@@ -1,6 +1,14 @@
 node_modules/
-.env
-*.env
+
+# Local/private env backups
+.env.private*
+.env.local
+.env.*.local
+
+# WhatsApp session asli jangan upload
+session/*
+!session/README.md
+!session/.gitkeep
 
 sessions/
 auth/
@@ -13,7 +21,6 @@ creds*.json
 _backup*/
 backup*/
 backup-*/
-backup-old-js/
 *.tar.gz
 *.zip
 *.bak
@@ -24,9 +31,3 @@ temp/
 tmp/
 logs/
 *.log
-.DS_Store
-
-# WhatsApp session folder
-session/*
-!session/README.md
-!session/.gitkeep

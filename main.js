@@ -1,3 +1,4 @@
+const { learnOwnerLid } = require('./lib/allogic-owner-resolver');
 // 🧹 Fix for ENOSPC / temp overflow in hosted panels
 const fs = require('fs');
 const path = require('path');
@@ -368,7 +369,85 @@ async function handleMessages(sock, messageUpdate, printLog) {
 
         // Command handlers - Execute commands immediately without waiting for typing indicator
         // We'll show typing indicator after command execution if needed
+
+        // ALLOGIC_AUTO_OWNER_LID_RESOLVER
+        try {
+            await learnOwnerLid(sock, chatId, message);
+        } catch (e) {
+            console.log('[AUTO OWNER LID RESOLVER ERROR]', e.message);
+        }
+
         let commandExecuted = false;
+
+        // ALLOGIC_TOGGLE_ALIAS_FINAL
+        // Normalisasi command toggle agar AI/natural command bisa pakai Bahasa Indonesia.
+        // Contoh: .autotyping hidupkan => .autotyping on
+        // Contoh: .anticall matikan => .anticall off
+        try {
+            const toggleAliasMap = {
+                hidupkan: 'on',
+                nyalakan: 'on',
+                aktifkan: 'on',
+                aktif: 'on',
+                enable: 'on',
+                enabled: 'on',
+                on: 'on',
+
+                matikan: 'off',
+                nonaktifkan: 'off',
+                nonaktif: 'off',
+                disable: 'off',
+                disabled: 'off',
+                off: 'off'
+            };
+
+            const toggleCommands = new Set([
+                'autotyping',
+                'autoread',
+                'autoreact',
+                'autostatus',
+                'anticall',
+                'antidelete',
+                'pmblocker',
+                'antilink',
+                'antitag',
+                'antibadword',
+                'chatbot',
+                'welcome',
+                'goodbye'
+            ]);
+
+            const mToggle = String(userMessage || '').trim().match(/^\.([a-z0-9_]+)\s+(.+)$/i);
+
+            if (mToggle) {
+                const cmdName = mToggle[1].toLowerCase();
+                const argRaw = mToggle[2].trim().toLowerCase();
+                const firstArg = argRaw.split(/\s+/)[0];
+
+                if (toggleCommands.has(cmdName) && toggleAliasMap[firstArg]) {
+                    const fixed = `.${cmdName} ${toggleAliasMap[firstArg]}`;
+
+                    console.log(`🔧 Toggle Alias: ${userMessage} => ${fixed}`);
+
+                    userMessage = fixed;
+                    rawText = fixed;
+
+                    if (message?.message?.conversation) {
+                        message.message.conversation = fixed;
+                    } else if (message?.message?.extendedTextMessage?.text) {
+                        message.message.extendedTextMessage.text = fixed;
+                    } else if (message?.message?.imageMessage?.caption) {
+                        message.message.imageMessage.caption = fixed;
+                    } else if (message?.message?.videoMessage?.caption) {
+                        message.message.videoMessage.caption = fixed;
+                    }
+                }
+            }
+        } catch (e) {
+            console.log('[TOGGLE_ALIAS_ERROR]', e.message);
+        }
+
+
 
         // MODE_PUBLIC_PRIVATE_ALIAS_FINAL
         if (/^\.mode\s+(publik|public)$/i.test(userMessage)) {
