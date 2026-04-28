@@ -2,7 +2,6 @@ node_modules/
 .env
 *.env
 
-session/
 sessions/
 auth/
 auth_info_baileys/
@@ -26,3 +25,8 @@ tmp/
 logs/
 *.log
 .DS_Store
+
+# WhatsApp session folder
+session/*
+!session/README.md
+!session/.gitkeep
