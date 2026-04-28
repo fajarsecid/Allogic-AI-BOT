@@ -38,8 +38,8 @@ async function handleSsCommand(sock, chatId, message, match) {
 
         // Send the screenshot
         await sock.sendMessage(chatId, {
-            image: imageBuffer,
-        }, {
+            image: imageBuffer
+}, {
             quoted: message
         });
 

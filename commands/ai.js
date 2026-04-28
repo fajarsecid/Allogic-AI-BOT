@@ -1,105 +1,68 @@
-const axios = require('axios');
-const fetch = require('node-fetch');
+const { askAllogicAI } = require('../lib/allogic-ai');
+const { runToolIntent } = require('../lib/allogic-tools');
+const { runOwnerAdminIntent } = require('../lib/allogic-admin-tools');
+
+function extractText(message) {
+    return message.message?.conversation ||
+        message.message?.extendedTextMessage?.text ||
+        message.message?.imageMessage?.caption ||
+        message.message?.videoMessage?.caption ||
+        '';
+}
+
+function getCommandAndQuery(text) {
+    const parts = String(text || '').trim().split(/\s+/);
+    const command = (parts.shift() || '').toLowerCase();
+    return { command, query: parts.join(' ').trim() };
+}
 
 async function aiCommand(sock, chatId, message) {
     try {
-        const text = message.message?.conversation || message.message?.extendedTextMessage?.text;
-        
-        if (!text) {
-            return await sock.sendMessage(chatId, { 
-                text: "Please provide a question after .gpt or .gemini\n\nExample: .gpt write a basic html code"
-            }, {
-                quoted: message
-            });
-        }
-
-        // Get the command and query
-        const parts = text.split(' ');
-        const command = parts[0].toLowerCase();
-        const query = parts.slice(1).join(' ').trim();
+        const text = extractText(message);
+        const { command, query } = getCommandAndQuery(text);
 
         if (!query) {
-            return await sock.sendMessage(chatId, { 
-                text: "Please provide a question after .gpt or .gemini"
-            }, {quoted:message});
+            return await sock.sendMessage(chatId, {
+                text: `🤖 *Allogic AI*
+
+Kirim pertanyaan setelah command.
+
+Contoh:
+.ai siapa kamu?
+.ai apa kelebihan kamu?
+.ai tools apa aja?
+.ai download mp3 https://youtu.be/xxxxx
+.ai download mp4 https://youtu.be/xxxxx`
+            }, { quoted: message });
         }
 
-        try {
-            // Show processing message
-            await sock.sendMessage(chatId, {
-                react: { text: '🤖', key: message.key }
-            });
+        const adminExecuted = await runOwnerAdminIntent(sock, chatId, message, query);
+        if (adminExecuted) return;
 
-            if (command === '.gpt') {
-                // Call the GPT API
-                const response = await axios.get(`https://zellapi.autos/ai/chatbot?text=${encodeURIComponent(query)}`);
-                
-                if (response.data && response.data.status && response.data.result) {
-                    const answer = response.data.result;
-                    await sock.sendMessage(chatId, {
-                        text: answer
-                    }, {
-                        quoted: message
-                    });
-                    
-                } else {
-                    throw new Error('Invalid response from API');
-                }
-            } else if (command === '.gemini') {
-                const apis = [
-                    `https://vapis.my.id/api/gemini?q=${encodeURIComponent(query)}`,
-                    `https://api.siputzx.my.id/api/ai/gemini-pro?content=${encodeURIComponent(query)}`,
-                    `https://api.ryzendesu.vip/api/ai/gemini?text=${encodeURIComponent(query)}`,
-                    `https://zellapi.autos/ai/chatbot?text=${encodeURIComponent(query)}`,
-                    `https://api.giftedtech.my.id/api/ai/geminiai?apikey=gifted&q=${encodeURIComponent(query)}`,
-                    `https://api.giftedtech.my.id/api/ai/geminiaipro?apikey=gifted&q=${encodeURIComponent(query)}`
-                ];
+        const toolExecuted = await runToolIntent(sock, chatId, message, query);
+        if (toolExecuted) return;
 
-                for (const api of apis) {
-                    try {
-                        const response = await fetch(api);
-                        const data = await response.json();
+        await sock.sendMessage(chatId, { react: { text: '🤖', key: message.key } }).catch(() => {});
+        await sock.presenceSubscribe(chatId).catch(() => {});
+        await sock.sendPresenceUpdate('composing', chatId).catch(() => {});
 
-                        if (data.message || data.data || data.answer || data.result) {
-                            const answer = data.message || data.data || data.answer || data.result;
-                            await sock.sendMessage(chatId, {
-                                text: answer
-                            }, {
-                                quoted: message
-                            });
-                            
-                            return;
-                        }
-                    } catch (e) {
-                        continue;
-                    }
-                }
-                throw new Error('All Gemini APIs failed');
-            }
-        } catch (error) {
-            console.error('API Error:', error);
-            await sock.sendMessage(chatId, {
-                text: "❌ Failed to get response. Please try again later.",
-                contextInfo: {
-                    mentionedJid: [message.key.participant || message.key.remoteJid],
-                    quotedMessage: message.message
-                }
-            }, {
-                quoted: message
-            });
-        }
+        const provider =
+            command === '.gemini' ? 'google' :
+            command === '.groq' ? 'groq' :
+            undefined;
+
+        // Jangan tempel daftar tools ke semua prompt.
+        // Tools sudah ditangani oleh local reply / runToolIntent.
+        const answer = await askAllogicAI(query, { provider });
+
+        await sock.sendMessage(chatId, { text: answer }, { quoted: message });
+        await sock.sendMessage(chatId, { react: { text: '✅', key: message.key } }).catch(() => {});
     } catch (error) {
-        console.error('AI Command Error:', error);
+        console.error('Allogic AI Command Error:', error.message);
         await sock.sendMessage(chatId, {
-            text: "❌ An error occurred. Please try again later.",
-            contextInfo: {
-                mentionedJid: [message.key.participant || message.key.remoteJid],
-                quotedMessage: message.message
-            }
-        }, {
-            quoted: message
-        });
+            text: `❌ Allogic AI sedang tidak bisa menjawab. Coba lagi nanti atau cek API key di .env.`
+        }, { quoted: message });
     }
 }
 
-module.exports = aiCommand; 
+module.exports = aiCommand;

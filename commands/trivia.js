@@ -15,8 +15,8 @@ async function startTrivia(sock, chatId) {
         triviaGames[chatId] = {
             question: questionData.question,
             correctAnswer: questionData.correct_answer,
-            options: [...questionData.incorrect_answers, questionData.correct_answer].sort(),
-        };
+            options: [...questionData.incorrect_answers, questionData.correct_answer].sort()
+};
 
         sock.sendMessage(chatId, {
             text: `Trivia Time!\n\nQuestion: ${triviaGames[chatId].question}\nOptions:\n${triviaGames[chatId].options.join('\n')}`

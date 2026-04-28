@@ -87,15 +87,10 @@ async function handleLinkDetection(sock, chatId, message, userMessage, senderId)
     let shouldDelete = false;
 
     const linkPatterns = {
-        whatsappGroup: /chat\.whatsapp\.com\/[A-Za-z0-9]{20,}/i,
-        whatsappChannel: /wa\.me\/channel\/[A-Za-z0-9]{20,}/i,
+        whatsappGroup: /chat\.whatsapp\.com\/[A-Za-z0-9_-]{20,}/i,
+        whatsappChannel: /wa\.me\/channel\/[A-Za-z0-9_-]{20,}/i,
         telegram: /t\.me\/[A-Za-z0-9_]+/i,
-        // Matches:
-        // - Full URLs with protocol (http/https)
-        // - URLs starting with www.
-        // - Bare domains anywhere in the string, even when attached to text
-        //   e.g., "helloinstagram.comworld" or "testhttps://x.com"
-        allLinks: /https?:\/\/\S+|www\.\S+|(?:[a-z0-9-]+\.)+[a-z]{2,}(?:\/\S*)?/i,
+        allLinks: /https?:\/\/\S+|www\.\S+|(?:[a-z0-9-]+\.)+[a-z]{2,}/i
     };
 
     // Detect WhatsApp Group links
@@ -121,8 +116,8 @@ async function handleLinkDetection(sock, chatId, message, userMessage, senderId)
 
         try {
             await sock.sendMessage(chatId, {
-                delete: { remoteJid: chatId, fromMe: false, id: quotedMessageId, participant: quotedParticipant },
-            });
+                delete: { remoteJid: chatId, fromMe: false, id: quotedMessageId, participant: quotedParticipant }
+});
             console.log(`Message with ID ${quotedMessageId} deleted successfully.`);
         } catch (error) {
             console.error('Failed to delete message:', error);
@@ -137,5 +132,5 @@ async function handleLinkDetection(sock, chatId, message, userMessage, senderId)
 
 module.exports = {
     handleAntilinkCommand,
-    handleLinkDetection,
+    handleLinkDetection
 };

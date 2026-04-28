@@ -8,5 +8,11 @@
   "welcome": {},
   "goodbye": {},
   "chatbot": {},
-  "autoReaction": false
+  "autoReaction": false,
+  "antitag": {
+    "120363427757110590@g.us": {
+      "enabled": true,
+      "action": "delete"
+    }
+  }
 }

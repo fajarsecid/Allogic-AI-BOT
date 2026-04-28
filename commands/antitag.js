@@ -95,7 +95,7 @@ async function handleTagDetection(sock, chatId, message, senderId) {
         const textMentions = messageText.match(/@[\d+\s\-()~.]+/g) || [];
         
         // Also match numeric-only mentions (like @217875470114951)
-        const numericMentions = messageText.match(/@\d{10,}/g) || [];
+        const numericMentions = messageText.match(/@\d{10,16}/g) || [];
         
         // Combine all mentions and remove duplicates
         const allMentions = [...new Set([...mentionedJids, ...textMentions, ...numericMentions])];

@@ -12,8 +12,8 @@ function startHangman(sock, chatId) {
         maskedWord: maskedWord.split(' '),
         guessedLetters: [],
         wrongGuesses: 0,
-        maxWrongGuesses: 6,
-    };
+        maxWrongGuesses: 6
+};
 
     sock.sendMessage(chatId, { text: `Game started! The word is: ${maskedWord}` });
 }

@@ -10,8 +10,8 @@ END:VCARD
 `;
 
     await sock.sendMessage(chatId, {
-        contacts: { displayName: settings.botOwner, contacts: [{ vcard }] },
-    });
+        contacts: { displayName: settings.botOwner, contacts: [{ vcard }] }
+});
 }
 
 module.exports = ownerCommand;

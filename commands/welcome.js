@@ -76,7 +76,7 @@ async function handleJoinEvent(sock, id, participants) {
                     hour12: true
                 });
                 
-                finalMessage = `╭╼━≪•𝙽𝙴𝚆 𝙼𝙴𝙼𝙱𝙴𝚁•≫━╾╮\n┃𝚆𝙴𝙻𝙲𝙾𝙼𝙴: @${displayName} 👋\n┃Member count: #${groupMetadata.participants.length}\n┃𝚃𝙸𝙼𝙴: ${timeString}⏰\n╰━━━━━━━━━━━━━━━╯\n\n*@${displayName}* Welcome to *${groupName}*! 🎉\n*Group 𝙳𝙴𝚂𝙲𝚁𝙸𝙿𝚃𝙸𝙾𝙽*\n${groupDesc}\n\n> *ᴘᴏᴡᴇʀᴇᴅ ʙʏ Knight Bot*`;
+                finalMessage = `╭╼━≪•𝙽𝙴𝚆 𝙼𝙴𝙼𝙱𝙴𝚁•≫━╾╮\n┃𝚆𝙴𝙻𝙲𝙾𝙼𝙴: @${displayName} 👋\n┃Member count: #${groupMetadata.participants.length}\n┃𝚃𝙸𝙼𝙴: ${timeString}⏰\n╰━━━━━━━━━━━━━━━╯\n\n*@${displayName}* Welcome to *${groupName}*! 🎉\n*Group 𝙳𝙴𝚂𝙲𝚁𝙸𝙿𝚃𝙸𝙾𝙽*\n${groupDesc}\n\n> *ᴘᴏᴡᴇʀᴇᴅ ʙʏ Allogic AI*`;
             }
             
             // Try to send with image first (always try images)
@@ -104,9 +104,8 @@ async function handleJoinEvent(sock, id, participants) {
                     await sock.sendMessage(id, {
                         image: imageBuffer,
                         caption: finalMessage,
-                        mentions: [participantString],
-                        ...channelInfo
-                    });
+                        mentions: [participantString]
+});
                     continue; // Skip to next participant
                 }
             } catch (imageError) {
@@ -116,9 +115,8 @@ async function handleJoinEvent(sock, id, participants) {
             // Send text message (either custom message or fallback)
             await sock.sendMessage(id, {
                 text: finalMessage,
-                mentions: [participantString],
-                ...channelInfo
-            });
+                mentions: [participantString]
+});
         } catch (error) {
             console.error('Error sending welcome message:', error);
             // Fallback to text message
@@ -138,9 +136,8 @@ async function handleJoinEvent(sock, id, participants) {
             
             await sock.sendMessage(id, {
                 text: fallbackMessage,
-                mentions: [participantString],
-                ...channelInfo
-            });
+                mentions: [participantString]
+});
         }
     }
 }

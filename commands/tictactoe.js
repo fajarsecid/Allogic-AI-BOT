@@ -39,8 +39,8 @@ async function tictactoeCommand(sock, chatId, senderId, text) {
                 '6': '6️⃣',
                 '7': '7️⃣',
                 '8': '8️⃣',
-                '9': '9️⃣',
-            }[v]));
+                '9': '9️⃣'
+}[v]));
 
             const str = `
 🎮 *TicTacToe Game Started!*
@@ -140,8 +140,8 @@ async function handleTicTacToeMove(sock, chatId, senderId, text) {
             '6': '6️⃣',
             '7': '7️⃣',
             '8': '8️⃣',
-            '9': '9️⃣',
-        }[v]));
+            '9': '9️⃣'
+}[v]));
 
         if (isSurrender) {
             // Set the winner to the opponent of the surrendering player

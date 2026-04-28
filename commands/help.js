@@ -5,10 +5,11 @@ const path = require('path');
 async function helpCommand(sock, chatId, message) {
     const helpMessage = `
 ╔═══════════════════╗
-   *🤖 ${settings.botName || 'KnightBot-MD'}*  
+   *🤖 ${settings.botName || 'Allogic AI'}*
    Version: *${settings.version || '3.0.0'}*
-   by ${settings.botOwner || 'Mr Unique Hacker'}
-   YT : ${global.ytch}
+   by ${settings.botOwner || 'Allogic'}
+   IG : @fajarid_real
+   Built from: Knight Bot
 ╚═══════════════════╝
 
 *Available Commands:*
@@ -29,13 +30,13 @@ async function helpCommand(sock, chatId, message) {
 ║ ➤ .lyrics <song_title>
 ║ ➤ .8ball <question>
 ║ ➤ .groupinfo
-║ ➤ .staff or .admins 
+║ ➤ .staff or .admins
 ║ ➤ .vv
 ║ ➤ .trt <text> <lang>
 ║ ➤ .ss <link>
 ║ ➤ .jid
 ║ ➤ .url
-╚═══════════════════╝ 
+╚═══════════════════╝
 
 ╔═══════════════════╗
 👮‍♂️ *Admin Commands*:
@@ -94,21 +95,21 @@ async function helpCommand(sock, chatId, message) {
 ║ ➤ .removebg
 ║ ➤ .remini
 ║ ➤ .crop <reply to image>
-║ ➤ .tgsticker <Link>
+║ ➤ .tgsticker <link>
 ║ ➤ .meme
-║ ➤ .take <packname> 
+║ ➤ .take <packname>
 ║ ➤ .emojimix <emj1>+<emj2>
 ║ ➤ .igs <insta link>
 ║ ➤ .igsc <insta link>
-╚═══════════════════╝  
+╚═══════════════════╝
 
 ╔═══════════════════╗
 🖼️ *Pies Commands*:
 ║ ➤ .pies <country>
-║ ➤ .china 
-║ ➤ .indonesia 
-║ ➤ .japan 
-║ ➤ .korea 
+║ ➤ .china
+║ ➤ .indonesia
+║ ➤ .japan
+║ ➤ .korea
 ║ ➤ .hijab
 ╚═══════════════════╝
 
@@ -125,8 +126,11 @@ async function helpCommand(sock, chatId, message) {
 
 ╔═══════════════════╗
 🤖 *AI Commands*:
+║ ➤ .ai <question>
+║ ➤ .ask <question>
 ║ ➤ .gpt <question>
 ║ ➤ .gemini <question>
+║ ➤ .groq <question>
 ║ ➤ .imagine <prompt>
 ║ ➤ .flux <prompt>
 ║ ➤ .sora <prompt>
@@ -136,7 +140,7 @@ async function helpCommand(sock, chatId, message) {
 🎯 *Fun Commands*:
 ║ ➤ .compliment @user
 ║ ➤ .insult @user
-║ ➤ .flirt 
+║ ➤ .flirt
 ║ ➤ .shayari
 ║ ➤ .goodnight
 ║ ➤ .roseday
@@ -178,7 +182,7 @@ async function helpCommand(sock, chatId, message) {
 ║ ➤ .facebook <link>
 ║ ➤ .tiktok <link>
 ║ ➤ .video <song name>
-║ ➤ .ytmp4 <Link>
+║ ➤ .ytmp4 <link>
 ╚═══════════════════╝
 
 ╔═══════════════════╗
@@ -189,78 +193,64 @@ async function helpCommand(sock, chatId, message) {
 ║ ➤ .lgbt
 ║ ➤ .lolice
 ║ ➤ .its-so-stupid
-║ ➤ .namecard 
+║ ➤ .namecard
 ║ ➤ .oogway
 ║ ➤ .tweet
-║ ➤ .ytcomment 
-║ ➤ .comrade 
-║ ➤ .gay 
-║ ➤ .glass 
-║ ➤ .jail 
-║ ➤ .passed 
+║ ➤ .ytcomment
+║ ➤ .comrade
+║ ➤ .gay
+║ ➤ .glass
+║ ➤ .jail
+║ ➤ .passed
 ║ ➤ .triggered
 ╚═══════════════════╝
 
 ╔═══════════════════╗
 🖼️ *ANIME*:
-║ ➤ .nom 
-║ ➤ .poke 
-║ ➤ .cry 
-║ ➤ .kiss 
-║ ➤ .pat 
-║ ➤ .hug 
-║ ➤ .wink 
-║ ➤ .facepalm 
+║ ➤ .nom
+║ ➤ .poke
+║ ➤ .cry
+║ ➤ .kiss
+║ ➤ .pat
+║ ➤ .hug
+║ ➤ .wink
+║ ➤ .facepalm
 ╚═══════════════════╝
 
 ╔═══════════════════╗
-💻 *Github Commands:*
+💻 *Github Commands*:
 ║ ➤ .git
 ║ ➤ .github
 ║ ➤ .sc
 ║ ➤ .script
 ║ ➤ .repo
 ╚═══════════════════╝
-
-Join our channel for updates:`;
+`;
 
     try {
         const imagePath = path.join(__dirname, '../assets/bot_image.jpg');
-        
+
         if (fs.existsSync(imagePath)) {
             const imageBuffer = fs.readFileSync(imagePath);
-            
-            await sock.sendMessage(chatId, {
-                image: imageBuffer,
-                caption: helpMessage,
-                contextInfo: {
-                    forwardingScore: 1,
-                    isForwarded: true,
-                    forwardedNewsletterMessageInfo: {
-                        newsletterJid: '120363161513685998@newsletter',
-                        newsletterName: 'KnightBot MD',
-                        serverMessageId: -1
-                    }
-                }
-            },{ quoted: message });
+
+            await sock.sendMessage(
+                chatId,
+                {
+                    image: imageBuffer,
+                    caption: helpMessage
+                },
+                { quoted: message }
+            );
         } else {
-            console.error('Bot image not found at:', imagePath);
-            await sock.sendMessage(chatId, { 
-                text: helpMessage,
-                contextInfo: {
-                    forwardingScore: 1,
-                    isForwarded: true,
-                    forwardedNewsletterMessageInfo: {
-                        newsletterJid: '120363161513685998@newsletter',
-                        newsletterName: 'KnightBot MD by Mr Unique Hacker',
-                        serverMessageId: -1
-                    } 
-                }
-            });
+            await sock.sendMessage(
+                chatId,
+                { text: helpMessage },
+                { quoted: message }
+            );
         }
     } catch (error) {
         console.error('Error in help command:', error);
-        await sock.sendMessage(chatId, { text: helpMessage });
+        await sock.sendMessage(chatId, { text: helpMessage }, { quoted: message });
     }
 }
 
