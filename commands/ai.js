@@ -1,4 +1,4 @@
-const { askAllogicAI } = require('../lib/allogic-ai');
+const { askAllogicAI } = require('../lib/allogic-ai-router-v4');
 const { prepareAiQuery } = require('../lib/allogic-ai-intent-router');
 const { runToolIntent } = require('../lib/allogic-tools');
 const { runOwnerAdminIntent } = require('../lib/allogic-admin-tools');
@@ -209,7 +209,7 @@ Contoh:
         const germanLocal = germanTerm ? allogicGermanDirectReply(germanTerm) : null;
 
         const preparedAi = prepareAiQuery(query, { provider });
-        console.log(`[AI INTENT ROUTER] reason=${preparedAi.reason} provider=${preparedAi.options.provider || provider}`);
+        console.log(`[AI INTENT ROUTER] reason=${preparedAi.reason} provider=${preparedAi.options.provider || provider || 'auto'}`);
         const answer = await askAllogicAI(preparedAi.query, preparedAi.options);
 
         await sock.sendMessage(chatId, { text: answer }, { quoted: message });

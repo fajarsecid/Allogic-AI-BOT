@@ -4,6 +4,7 @@ node_modules/
 .env.private*
 .env.local
 .env.*.local
+*.private*
 
 # WhatsApp session asli jangan upload
 session/*

