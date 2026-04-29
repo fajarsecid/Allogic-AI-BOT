@@ -1,6 +1,6 @@
 node_modules/
 
-# Local/private env backups
+# Private env backup/local
 .env.private*
 .env.local
 .env.*.local

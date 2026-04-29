@@ -1,3 +1,4 @@
+const { shouldSkipCommandPlanner } = require('./lib/allogic-ai-intent-router');
 const { learnOwnerLid } = require('./lib/allogic-owner-resolver');
 // 🧹 Fix for ENOSPC / temp overflow in hosted panels
 const fs = require('fs');
@@ -483,7 +484,7 @@ async function handleMessages(sock, messageUpdate, printLog) {
         // ALLOGIC_AI_COMMAND_PLANNER_BRIDGE
         // Kalau smart rewrite tidak menangkap perintah admin/owner,
         // AI planner akan coba memahami maksud kalimat user.
-        if (/^(\.ai|\.ask|\.gpt|\.gemini|\.groq|\.allogic)(\s|$)/i.test(userMessage)) {
+        if (/^(\.ai|\.ask|\.gpt|\.gemini|\.groq|\.allogic)(\s|$)/i.test(userMessage) && !shouldSkipCommandPlanner(userMessage)) {
             const planned = await planAdminOwnerCommand({
                 sock,
                 chatId,
@@ -506,7 +507,7 @@ async function handleMessages(sock, messageUpdate, printLog) {
         // ALLOGIC_UNIVERSAL_COMMAND_PLANNER_BRIDGE
         // Jika smart router/admin planner belum menangkap,
         // AI universal planner akan memahami semua command menu bot.
-        if (/^(\.ai|\.ask|\.gpt|\.gemini|\.groq|\.allogic)(\s|$)/i.test(userMessage)) {
+        if (/^(\.ai|\.ask|\.gpt|\.gemini|\.groq|\.allogic)(\s|$)/i.test(userMessage) && !shouldSkipCommandPlanner(userMessage)) {
             const plannerOriginalText = (
                 message?.message?.conversation ||
                 message?.message?.extendedTextMessage?.text ||
