@@ -1,4 +1,25 @@
 const { askAllogicAI } = require('../lib/allogic-ai-router-v4');
+
+function allogicMemoryScopeFromMessage(message) {
+    const key = message && message.key ? message.key : {};
+    const remoteJid = key.remoteJid || '';
+    const senderJid = key.participant || key.remoteJid || '';
+    const isGroup = String(remoteJid).endsWith('@g.us');
+
+    const senderNum = String(senderJid)
+        .replace(/@s\.whatsapp\.net|@lid|@g\.us/gi, '')
+        .replace(/\D/g, '') || String(senderJid).split('@')[0];
+
+    return {
+        userId: senderNum || senderJid,
+        sender: senderJid,
+        senderNum,
+        chatId: remoteJid,
+        groupId: isGroup ? remoteJid : '',
+        isGroup
+    };
+}
+
 const { prepareAiQuery } = require('../lib/allogic-ai-intent-router');
 const { runToolIntent } = require('../lib/allogic-tools');
 const { runOwnerAdminIntent } = require('../lib/allogic-admin-tools');
@@ -165,16 +186,24 @@ function getCommandAndQuery(text) {
     return { command, query: parts.join(' ').trim() };
 }
 
-async function aiCommand(sock, chatId, message) {
+async function aiCommand(sock, chatId, message, options = {}) {
     try {
-        const text = extractText(message);
-        const { command, query } = getCommandAndQuery(text);
+        const directQuery = typeof options.directQuery === 'string' ? options.directQuery.trim() : '';
+        const text = directQuery || extractText(message);
+        let { command, query } = getCommandAndQuery(text);
+
+        if (directQuery) {
+            command = '.ai';
+            query = directQuery;
+        }
 
         if (!query) {
             return await sock.sendMessage(chatId, {
                 text: `🤖 *Allogic AI*
 
 Kirim pertanyaan setelah command.
+
+Di private chat, kamu juga bisa langsung ketik pertanyaan tanpa .ai.
 
 Contoh:
 .ai siapa kamu?
@@ -191,26 +220,31 @@ Contoh:
         const toolExecuted = await runToolIntent(sock, chatId, message, query);
         if (toolExecuted) return;
 
-        await sock.sendMessage(chatId, { react: { text: '🤖', key: message.key } }).catch(() => {});
-        await sock.presenceSubscribe(chatId).catch(() => {});
-        await sock.sendPresenceUpdate('composing', chatId).catch(() => {});
+        if (!options.skipInitialReaction) {
+            await sock.sendMessage(chatId, { react: { text: '🤖', key: message.key } }).catch(() => {});
+        }
+
+        if (!options.skipInitialTyping) {
+            await sock.presenceSubscribe(chatId).catch(() => {});
+            await sock.sendPresenceUpdate('composing', chatId).catch(() => {});
+        }
 
         const provider =
             command === '.gemini' ? 'google' :
             command === '.groq' ? 'groq' :
             undefined;
 
-        // Jangan tempel daftar tools ke semua prompt.
-        // Tools sudah ditangani oleh local reply / runToolIntent.
-        let finalQuery = query;
-        let finalOptions = { provider };
-
         const germanTerm = allogicGermanTermFromQuery(query);
         const germanLocal = germanTerm ? allogicGermanDirectReply(germanTerm) : null;
+        if (germanLocal) {
+            await sock.sendMessage(chatId, { text: germanLocal }, { quoted: message });
+            await sock.sendMessage(chatId, { react: { text: '✅', key: message.key } }).catch(() => {});
+            return;
+        }
 
         const preparedAi = prepareAiQuery(query, { provider });
         console.log(`[AI INTENT ROUTER] reason=${preparedAi.reason} provider=${preparedAi.options.provider || provider || 'auto'}`);
-        const answer = await askAllogicAI(preparedAi.query, preparedAi.options);
+        const answer = await askAllogicAI(preparedAi.query, { ...preparedAi.options, memoryScope: allogicMemoryScopeFromMessage(message) });
 
         await sock.sendMessage(chatId, { text: answer }, { quoted: message });
         await sock.sendMessage(chatId, { react: { text: '✅', key: message.key } }).catch(() => {});

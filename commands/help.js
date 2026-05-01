@@ -88,6 +88,13 @@ async function helpCommand(sock, chatId, message) {
 ╚═══════════════════╝
 
 ╔═══════════════════╗
+🛠️ *Owner/Admin Tools*:
+║ ➤ .speedtest
+║ ➤ .serverinfo
+║ ➤ .infoserver
+╚═══════════════════╝
+
+╔═══════════════════╗
 🎨 *Image/Sticker Commands*:
 ║ ➤ .blur <image>
 ║ ➤ .simage <reply to sticker>
@@ -217,14 +224,6 @@ async function helpCommand(sock, chatId, message) {
 ║ ➤ .facepalm
 ╚═══════════════════╝
 
-╔═══════════════════╗
-💻 *Github Commands*:
-║ ➤ .git
-║ ➤ .github
-║ ➤ .sc
-║ ➤ .script
-║ ➤ .repo
-╚═══════════════════╝
 `;
 
     try {

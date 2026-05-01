@@ -32,3 +32,8 @@ temp/
 tmp/
 logs/
 *.log
+
+# Private prompt and memory
+data/memory/
+data/allogic-memory.json
+prompts/allogic-system-prompt-v5.txt

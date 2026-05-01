@@ -88,7 +88,8 @@ const aliveCommand = require('./commands/alive');
 const blurCommand = require('./commands/img-blur');
 const { welcomeCommand, handleJoinEvent } = require('./commands/welcome');
 const { goodbyeCommand, handleLeaveEvent } = require('./commands/goodbye');
-const githubCommand = require('./commands/github');
+const speedtestCommand = require('./commands/speedtest');
+const serverInfoCommand = require('./commands/serverinfo');
 const { handleAntiBadwordCommand, handleBadwordDetection } = require('./lib/antibadword');
 const antibadwordCommand = require('./commands/antibadword');
 const { handleChatbotCommand, handleChatbotResponse } = require('./commands/chatbot');
@@ -300,8 +301,19 @@ async function handleMessages(sock, messageUpdate, printLog) {
 
         // Then check for command prefix
         if (!userMessage.startsWith('.')) {
-            // Show typing indicator if autotyping is enabled
-            await handleAutotypingForMessage(sock, chatId, userMessage);
+            const directAiText = !isGroup && !message.key.fromMe && rawText
+                ? rawText.trim()
+                : '';
+            const shouldRunDirectAi = Boolean(directAiText && (isPublic || isOwnerOrSudoCheck));
+
+            if (shouldRunDirectAi) {
+                await sock.sendMessage(chatId, { react: { text: '🤖', key: message.key } }).catch(() => {});
+                await sock.presenceSubscribe(chatId).catch(() => {});
+                await sock.sendPresenceUpdate('composing', chatId).catch(() => {});
+            } else {
+                // Show typing indicator if autotyping is enabled
+                await handleAutotypingForMessage(sock, chatId, userMessage);
+            }
 
             if (isGroup) {
                 // Always run moderation features (antitag) regardless of mode
@@ -312,6 +324,15 @@ async function handleMessages(sock, messageUpdate, printLog) {
                 if (isPublic || isOwnerOrSudoCheck) {
                     await handleChatbotResponse(sock, chatId, message, userMessage, senderId);
                 }
+                return;
+            }
+
+            if (shouldRunDirectAi) {
+                await aiCommand(sock, chatId, message, {
+                    directQuery: directAiText,
+                    skipInitialReaction: true,
+                    skipInitialTyping: true
+                });
             }
             return;
         }
@@ -853,6 +874,20 @@ async function handleMessages(sock, messageUpdate, printLog) {
             case userMessage === '.ping':
                 await pingCommand(sock, chatId, message);
                 break;
+            case userMessage.startsWith('.speedtest') ||
+                userMessage === '.speed' ||
+                userMessage.startsWith('.speed '):
+                await speedtestCommand(sock, chatId, message);
+                break;
+            case userMessage.startsWith('.serverinfo') ||
+                userMessage.startsWith('.infoserver') ||
+                userMessage === '.server' ||
+                userMessage.startsWith('.server ') ||
+                userMessage === '.info server' ||
+                userMessage === '.server info' ||
+                userMessage === '.info derver':
+                await serverInfoCommand(sock, chatId, message);
+                break;
             case userMessage === '.alive':
                 await aliveCommand(sock, chatId, message);
                 break;
@@ -910,13 +945,6 @@ async function handleMessages(sock, messageUpdate, printLog) {
                     await sock.sendMessage(chatId, { text: 'This command can only be used in groups.'
 }, { quoted: message });
                 }
-                break;
-            case userMessage === '.git':
-            case userMessage === '.github':
-            case userMessage === '.sc':
-            case userMessage === '.script':
-            case userMessage === '.repo':
-                await githubCommand(sock, chatId, message);
                 break;
             case userMessage.startsWith('.antibadword'):
                 if (!isGroup) {
